@@ -1,0 +1,664 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>옷 정보 수정 - WeatherFit</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            background: #f8f7f4;
+            color: #292724;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        header {
+            border-bottom: 1px solid #eae7e1;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 0 25px;
+        }
+
+        /* 상단 메뉴 */
+
+        nav {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: #a58b70;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            font-size: 14px;
+            color: #77716a;
+        }
+
+        .nav-links a:hover {
+            color: #a58b70;
+        }
+
+        /* 페이지 제목 */
+
+        .page-heading {
+            padding: 55px 0 28px;
+        }
+
+        .eyebrow {
+            color: #a58b70;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .page-heading h1 {
+            font-size: 35px;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .page-heading p {
+            font-size: 14px;
+            color: #89827a;
+        }
+
+        /* 수정 폼 */
+
+        .form-card {
+            background: white;
+            border: 1px solid #eeeae4;
+            border-radius: 18px;
+            padding: 35px;
+            margin-bottom: 70px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.025);
+        }
+
+        .form-section {
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .section-description {
+            color: #99918a;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 9px;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            height: 48px;
+            padding: 0 14px;
+            border: 1px solid #e9e5df;
+            border-radius: 8px;
+            background: #fcfbf9;
+            color: #39342e;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            border-color: #a58b70;
+        }
+
+        input::placeholder {
+            color: #b5aea5;
+        }
+
+        /* 기존 사진 */
+
+        .current-image-box {
+            background: #faf9f6;
+            border: 1px solid #eeeae4;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .current-image {
+            width: 150px;
+            height: 170px;
+            object-fit: contain;
+            background: #eeeae4;
+            border-radius: 9px;
+            flex-shrink: 0;
+        }
+
+        .current-image-info {
+            font-size: 13px;
+            color: #827a72;
+        }
+
+        .current-image-info strong {
+            display: block;
+            color: #39342e;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .image-status {
+            display: inline-block;
+            background: #eee8df;
+            color: #8a735b;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+
+        /* 새 사진 업로드 */
+
+        .upload-area {
+            border: 1.5px dashed #d8cfc3;
+            background: #faf9f6;
+            border-radius: 12px;
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s, border 0.2s;
+        }
+
+        .upload-area:hover {
+            background: #f3eee7;
+            border-color: #a58b70;
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .upload-area h3 {
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        .upload-area p {
+            font-size: 12px;
+            color: #99918a;
+        }
+
+        .upload-area input {
+            display: none;
+        }
+
+        .preview-container {
+            display: none;
+            margin-top: 18px;
+            text-align: center;
+        }
+
+        .preview-container img {
+            width: 230px;
+            height: 250px;
+            max-width: 100%;
+            object-fit: contain;
+            background: #f5f3ef;
+            border-radius: 10px;
+        }
+
+        .preview-name {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #82786e;
+            overflow-wrap: anywhere;
+        }
+
+        /* 입력 항목 */
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .thickness-guide {
+            background: #f8f7f4;
+            padding: 12px 15px;
+            border-radius: 8px;
+            color: #89827a;
+            font-size: 12px;
+            margin-top: 10px;
+            line-height: 1.8;
+        }
+
+        /* 버튼 */
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            padding-top: 25px;
+            border-top: 1px solid #eeeae4;
+        }
+
+        .submit-button,
+        .cancel-button {
+            flex: 1;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .submit-button {
+            background: #38332e;
+            color: white;
+            border: none;
+        }
+
+        .submit-button:hover {
+            background: #a58b70;
+        }
+
+        .cancel-button {
+            background: #eeeae4;
+            color: #625344;
+            border: none;
+        }
+
+        .cancel-button:hover {
+            background: #e4d8c9;
+        }
+
+        /* 하단 */
+
+        footer {
+            border-top: 1px solid #eae7e1;
+            padding: 28px 0;
+            text-align: center;
+            color: #aaa39b;
+            font-size: 12px;
+        }
+
+        /* 모바일 */
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 18px;
+            }
+
+            nav {
+                height: 65px;
+            }
+
+            .nav-links {
+                gap: 12px;
+                font-size: 12px;
+            }
+
+            .page-heading {
+                padding: 40px 0 25px;
+            }
+
+            .page-heading h1 {
+                font-size: 29px;
+            }
+
+            .form-card {
+                padding: 22px 17px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 22px;
+            }
+
+            .current-image-box {
+                align-items: flex-start;
+                gap: 13px;
+            }
+
+            .current-image {
+                width: 110px;
+                height: 135px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 상단 네비게이션 -->
+    <header>
+        <div class="container">
+            <nav>
+                <a th:href="@{/}" class="logo">
+                    Weather<span>Fit</span>
+                </a>
+
+                <div class="nav-links">
+                    <a th:href="@{/}">홈</a>
+                    <a th:href="@{/clothes}">나의 옷장</a>
+                    <a th:href="@{/outfit/form}">AI 코디 추천</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- 페이지 제목 -->
+        <section class="page-heading">
+            <p class="eyebrow">MY PERSONAL WARDROBE</p>
+
+            <h1>옷 정보 수정하기</h1>
+
+            <p>
+                등록한 옷의 정보를 확인하고 원하는 내용으로 변경해 보세요.
+            </p>
+        </section>
+
+        <!-- 수정 폼 -->
+        <form class="form-card"
+              th:action="@{/clothes/{id}/edit(id=${clothing.id})}"
+              th:object="${clothing}"
+              method="post"
+              enctype="multipart/form-data">
+
+            <!-- 옷 이름 -->
+            <section class="form-section">
+
+                <p class="section-title">01. 옷 이름</p>
+
+                <p class="section-description">
+                    옷의 이름을 수정할 수 있습니다.
+                </p>
+
+                <label for="name">옷 이름</label>
+
+                <input type="text"
+                       id="name"
+                       th:field="*{name}"
+                       placeholder="예: 검정색 후드티"
+                       required>
+
+            </section>
+
+            <!-- 현재 사진 -->
+            <section class="form-section">
+
+                <p class="section-title">02. 현재 등록된 사진</p>
+
+                <p class="section-description">
+                    현재 옷장에 저장된 사진입니다.
+                </p>
+
+                <div class="current-image-box">
+
+                    <img class="current-image"
+                         th:src="${clothing.imagePath}"
+                         th:alt="${clothing.name}">
+
+                    <div class="current-image-info">
+
+                        <strong>현재 사용 중인 사진</strong>
+
+                        새 사진을 선택하지 않으면
+                        기존 사진이 그대로 유지됩니다.
+
+                        <br>
+
+                        <span class="image-status">
+                            현재 등록된 사진
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- 새 사진 -->
+            <section class="form-section">
+
+                <p class="section-title">03. 사진 변경</p>
+
+                <p class="section-description">
+                    사진을 변경하고 싶을 때만 새로운 이미지를 선택하세요.
+                </p>
+
+                <label for="image">새 옷 사진 선택</label>
+
+                <label class="upload-area" for="image">
+
+                    <div class="upload-icon">📷</div>
+
+                    <h3>새 사진을 선택해 주세요</h3>
+
+                    <p>사진을 선택하지 않으면 기존 사진이 유지됩니다.</p>
+
+					<input type="file"
+					       id="image"
+					       name="image"
+					       accept="image/*">
+
+                </label>
+
+                <!-- 새 사진 미리보기 -->
+                <div class="preview-container" id="previewContainer">
+
+                    <img id="imagePreview"
+                         src=""
+                         alt="새 사진 미리보기">
+
+                    <p class="preview-name" id="previewName"></p>
+
+                </div>
+
+            </section>
+
+            <!-- 카테고리 및 색상 -->
+            <section class="form-section">
+
+                <p class="section-title">04. 옷 정보</p>
+
+                <p class="section-description">
+                    카테고리와 색상을 변경할 수 있습니다.
+                </p>
+
+                <div class="form-row">
+
+                    <div>
+                        <label for="category">카테고리</label>
+
+                        <select id="category"
+                                th:field="*{category}"
+                                required>
+
+                            <option value="">카테고리 선택</option>
+                            <option value="상의">상의</option>
+                            <option value="하의">하의</option>
+                            <option value="아우터">아우터</option>
+                            <option value="원피스">원피스</option>
+                            <option value="신발">신발</option>
+                            <option value="기타">기타</option>
+
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="color">색상</label>
+
+                        <select id="color"
+                                th:field="*{color}"
+                                required>
+
+                            <option value="">색상 선택</option>
+                            <option value="검정">검정</option>
+                            <option value="흰색">흰색</option>
+                            <option value="회색">회색</option>
+                            <option value="베이지">베이지</option>
+                            <option value="갈색">갈색</option>
+                            <option value="빨강">빨강</option>
+                            <option value="주황">주황</option>
+                            <option value="노랑">노랑</option>
+                            <option value="초록">초록</option>
+                            <option value="파랑">파랑</option>
+                            <option value="보라">보라</option>
+                            <option value="기타">기타</option>
+
+                        </select>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- 두께 -->
+            <section class="form-section">
+
+                <p class="section-title">05. 옷 두께</p>
+
+                <p class="section-description">
+                    날씨에 맞는 코디 추천을 위해 옷의 두께를 설정해 주세요.
+                </p>
+
+                <label for="thickness">두께 선택</label>
+
+                <select id="thickness"
+                        th:field="*{thickness}"
+                        required>
+
+                    <option value="">두께 선택</option>
+                    <option value="1">1 - 매우 얇음</option>
+                    <option value="2">2 - 얇음</option>
+                    <option value="3">3 - 보통</option>
+                    <option value="4">4 - 두꺼움</option>
+                    <option value="5">5 - 매우 두꺼움</option>
+
+                </select>
+
+                <div class="thickness-guide">
+                    1 : 여름용 얇은 옷<br>
+                    2 : 가벼운 셔츠나 얇은 옷<br>
+                    3 : 일반적인 두께의 옷<br>
+                    4 : 두꺼운 니트나 맨투맨<br>
+                    5 : 겨울용 두꺼운 옷
+                </div>
+
+            </section>
+
+            <!-- 버튼 -->
+            <div class="form-actions">
+
+                <a th:href="@{/clothes}"
+                   class="cancel-button">
+                    취소하기
+                </a>
+
+                <button type="submit"
+                        class="submit-button">
+                    수정 내용 저장하기
+                </button>
+
+            </div>
+
+        </form>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            WeatherFit © 2026. Dress for the weather, style your day.
+        </div>
+    </footer>
+
+    <!-- 새 사진 미리보기 -->
+    <script>
+        const imageInput = document.getElementById('image');
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewName = document.getElementById('previewName');
+
+        let currentImageUrl = null;
+
+        imageInput.addEventListener('change', function () {
+
+            const file = this.files[0];
+
+            if (!file) {
+                previewContainer.style.display = 'none';
+                imagePreview.src = '';
+
+                if (currentImageUrl) {
+                    URL.revokeObjectURL(currentImageUrl);
+                    currentImageUrl = null;
+                }
+
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                alert('이미지 파일만 선택할 수 있습니다.');
+                this.value = '';
+                previewContainer.style.display = 'none';
+                return;
+            }
+
+            if (currentImageUrl) {
+                URL.revokeObjectURL(currentImageUrl);
+            }
+
+            currentImageUrl = URL.createObjectURL(file);
+
+            imagePreview.src = currentImageUrl;
+            previewName.textContent = file.name;
+            previewContainer.style.display = 'block';
+
+        });
+    </script>
+
+</body>
+</html>

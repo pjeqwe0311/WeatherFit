@@ -1,0 +1,882 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherFit | 오늘의 날씨, 오늘의 스타일</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            background: #f8f7f4;
+            color: #292724;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        /* 네비게이션 */
+
+        header {
+            background: rgba(248, 247, 244, 0.95);
+            border-bottom: 1px solid #eae7e1;
+        }
+
+        nav {
+            height: 78px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: #a58b70;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            font-size: 14px;
+            color: #77716a;
+        }
+
+        .nav-links a {
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #a58b70;
+        }
+
+        /* 메인 소개 영역 */
+
+        .hero {
+            min-height: 390px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+            padding: 75px 0 65px;
+        }
+
+        .hero-text {
+            max-width: 620px;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            color: #a58b70;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(40px, 5vw, 61px);
+            line-height: 1.25;
+            letter-spacing: -2.5px;
+            margin-bottom: 22px;
+        }
+
+        .hero h1 span {
+            color: #a58b70;
+        }
+
+        .hero-description {
+            color: #827d76;
+            font-size: 15px;
+            line-height: 2;
+            margin-bottom: 28px;
+        }
+
+        .hero-button {
+            display: inline-block;
+            padding: 14px 24px;
+            background: #38332e;
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .hero-button:hover {
+            background: #a58b70;
+            transform: translateY(-2px);
+        }
+
+        /* 메인 장식 */
+
+        .hero-visual {
+            width: 350px;
+            height: 290px;
+            flex-shrink: 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #eee8df;
+            border-radius: 45% 45% 18px 18px;
+            overflow: hidden;
+        }
+
+        .hero-visual::before {
+            content: "";
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            border: 1px solid rgba(165, 139, 112, 0.3);
+            border-radius: 50%;
+        }
+
+        /* 의상 일러스트 */
+
+        .hero-illustration {
+            width: 175px;
+            height: 200px;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 8px 10px rgba(90, 65, 40, 0.08));
+        }
+
+        .hero-caption {
+            position: absolute;
+            bottom: 18px;
+            right: 20px;
+            color: #8c7762;
+            font-size: 11px;
+            letter-spacing: 2px;
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        /* 공통 섹션 */
+
+        .section-heading {
+            margin-bottom: 22px;
+        }
+
+        .section-heading h2 {
+            font-size: 23px;
+            letter-spacing: -0.7px;
+        }
+
+        .section-heading p {
+            color: #99918a;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        /* 날씨 영역 */
+
+        .weather-section {
+            margin-bottom: 75px;
+        }
+
+        .weather-card {
+            background: white;
+            border: 1px solid #eeeae4;
+            border-radius: 20px;
+            padding: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.025);
+        }
+
+        .weather-main {
+            min-width: 190px;
+        }
+
+        .weather-location {
+            color: #99918a;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .weather-temperature {
+            font-size: 55px;
+            font-weight: 800;
+            letter-spacing: -3px;
+            line-height: 1.2;
+        }
+
+        .weather-description {
+            color: #a58b70;
+            font-size: 15px;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 13px;
+            flex: 1;
+        }
+
+        .weather-item {
+            background: #f8f7f4;
+            border-radius: 13px;
+            padding: 22px 12px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .weather-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .weather-item .icon {
+            font-size: 23px;
+            margin-bottom: 8px;
+        }
+
+        .weather-item .label {
+            color: #99918a;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .weather-item .value {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        /* 기능 영역 */
+
+        .feature-section {
+            margin-bottom: 65px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+
+        .feature-card {
+            min-height: 270px;
+            border-radius: 18px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.06);
+        }
+
+        .wardrobe-card {
+            background: #eee8df;
+        }
+
+        .recommend-card {
+            background: #38332e;
+            color: white;
+        }
+
+        .feature-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .feature-icon {
+            font-size: 36px;
+        }
+
+        .feature-number {
+            color: #a58b70;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            margin-top: 20px;
+            margin-bottom: 9px;
+        }
+
+        .feature-card p {
+            font-size: 13px;
+            color: #81786f;
+            line-height: 1.9;
+        }
+
+        .recommend-card p {
+            color: #c6bdb3;
+        }
+
+        .feature-button {
+            display: inline-block;
+            align-self: flex-start;
+            margin-top: 24px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: white;
+            color: #39342e;
+            font-size: 13px;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+
+        .feature-button:hover {
+            background: #f0ebe4;
+        }
+
+        .recommend-card .feature-button {
+            background: #c7ad90;
+            color: #29231e;
+        }
+
+        .recommend-card .feature-button:hover {
+            background: #d9c4aa;
+        }
+
+        /* 이용 방법 */
+
+        .guide-section {
+            margin-bottom: 75px;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .guide-item {
+            background: white;
+            border: 1px solid #eeeae4;
+            border-radius: 14px;
+            padding: 25px 22px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .guide-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .guide-number {
+            color: #a58b70;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            margin-bottom: 14px;
+        }
+
+        .guide-item h3 {
+            font-size: 16px;
+            margin-bottom: 9px;
+        }
+
+        .guide-item p {
+            color: #81786f;
+            font-size: 12px;
+            line-height: 1.9;
+        }
+
+        /* 하단 안내 */
+
+        .bottom-banner {
+            background: #eee8df;
+            border-radius: 16px;
+            padding: 27px 30px;
+            margin-bottom: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .bottom-banner p {
+            color: #786e64;
+            font-size: 14px;
+        }
+
+        .bottom-banner strong {
+            color: #39342e;
+        }
+
+        .bottom-banner span {
+            color: #a58b70;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* 하단 */
+
+        footer {
+            border-top: 1px solid #eae7e1;
+            padding: 30px 0;
+            text-align: center;
+            color: #aaa39b;
+            font-size: 12px;
+        }
+
+        /* 모바일 반응형 */
+
+        @media (max-width: 800px) {
+            .hero {
+                padding: 60px 0 50px;
+            }
+
+            .hero-visual {
+                width: 260px;
+                height: 250px;
+            }
+
+            .hero-illustration {
+                width: 145px;
+                height: 170px;
+            }
+
+            .weather-card {
+                padding: 25px;
+            }
+
+            .weather-main {
+                min-width: 150px;
+            }
+
+            .weather-temperature {
+                font-size: 45px;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .container {
+                padding: 0 19px;
+            }
+
+            nav {
+                height: 67px;
+            }
+
+            .logo {
+                font-size: 23px;
+            }
+
+            .nav-links {
+                gap: 13px;
+                font-size: 11px;
+            }
+
+            .hero {
+                padding: 55px 0 45px;
+            }
+
+            .hero-visual {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 39px;
+            }
+
+            .hero-description {
+                font-size: 13px;
+            }
+
+            .weather-section {
+                margin-bottom: 55px;
+            }
+
+            .weather-card {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 24px;
+            }
+
+            .weather-main {
+                text-align: center;
+            }
+
+            .weather-details {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .weather-item {
+                padding: 16px 5px;
+            }
+
+            .weather-item .value {
+                font-size: 14px;
+            }
+
+            .weather-item .label {
+                font-size: 10px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .feature-card {
+                min-height: 235px;
+                padding: 25px;
+            }
+
+            .guide-grid {
+                grid-template-columns: 1fr;
+                gap: 11px;
+            }
+
+            .guide-item {
+                padding: 21px;
+            }
+
+            .bottom-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 23px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .nav-links {
+                gap: 9px;
+                font-size: 10px;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .weather-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 상단 네비게이션 -->
+    <header>
+        <div class="container">
+            <nav>
+                <a th:href="@{/}" class="logo">
+                    Weather<span>Fit</span>
+                </a>
+
+                <div class="nav-links">
+                    <a th:href="@{/}">홈</a>
+                    <a th:href="@{/clothes}">나의 옷장</a>
+                    <a th:href="@{/outfit/form}">
+                        AI 코디 추천
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- 메인 소개 -->
+        <section class="hero">
+
+            <div class="hero-text">
+
+                <p class="eyebrow">WEATHER × FASHION</p>
+
+                <h1>
+                    오늘의 날씨,<br>
+                    <span>오늘의 스타일.</span>
+                </h1>
+
+                <p class="hero-description">
+                    매일 달라지는 날씨에 어떤 옷을 입을지 고민되나요?<br>
+                    나만의 옷장과 AI를 활용해<br>
+                    오늘에 어울리는 코디를 만나보세요.
+                </p>
+
+                <a th:href="@{/outfit/form}" class="hero-button">
+                    오늘의 코디 추천받기 →
+                </a>
+
+            </div>
+
+            <div class="hero-visual">
+
+                <svg class="hero-illustration"
+                     viewBox="0 0 200 220"
+                     fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+
+                    <!-- 옷걸이 고리 -->
+                    <path d="M100 31
+                             C100 20 114 18 114 28
+                             C114 34 106 37 100 43"
+                          stroke="#92775d"
+                          stroke-width="2.5"
+                          stroke-linecap="round"/>
+
+                    <!-- 옷걸이 -->
+                    <path d="M100 43
+                             L38 86
+                             Q33 90 42 90
+                             L158 90
+                             Q167 90 162 86
+                             L100 43Z"
+                          stroke="#92775d"
+                          stroke-width="2.5"
+                          stroke-linejoin="round"/>
+
+                    <!-- 의상 -->
+                    <path d="M76 94
+                             L54 104
+                             L35 145
+                             L57 155
+                             L69 132
+                             L69 190
+                             L131 190
+                             L131 132
+                             L143 155
+                             L165 145
+                             L146 104
+                             L124 94"
+                          fill="#d9c9b7"
+                          stroke="#92775d"
+                          stroke-width="2"
+                          stroke-linejoin="round"/>
+
+                    <!-- 목 부분 -->
+                    <path d="M76 94
+                             Q100 116 124 94"
+                          stroke="#92775d"
+                          stroke-width="2"
+                          stroke-linecap="round"/>
+
+                    <!-- 중앙 장식선 -->
+                    <path d="M100 113 L100 190"
+                          stroke="#a58b70"
+                          stroke-width="1.5"
+                          stroke-linecap="round"/>
+
+                    <!-- 단추 -->
+                    <circle cx="106" cy="132" r="2" fill="#92775d"/>
+                    <circle cx="106" cy="148" r="2" fill="#92775d"/>
+                    <circle cx="106" cy="164" r="2" fill="#92775d"/>
+
+                </svg>
+
+                <span class="hero-caption">YOUR DAILY STYLE</span>
+
+            </div>
+
+        </section>
+
+        <!-- 오늘의 날씨 -->
+        <section class="weather-section">
+
+            <div class="section-heading">
+                <h2>오늘의 날씨</h2>
+                <p>현재 서울의 날씨 정보를 확인해 보세요.</p>
+            </div>
+
+            <div class="weather-card">
+
+                <div class="weather-main">
+
+                    <p class="weather-location">
+                        📍 SEOUL, KOREA
+                    </p>
+
+                    <div class="weather-temperature">
+                        <span th:text="${weather.temperature_2m} + '°C'"></span>
+                    </div>
+
+                    <p class="weather-description" th:text="${weatherDescription}">
+                    </p>
+
+                </div>
+
+                <div class="weather-details">
+
+                    <div class="weather-item">
+                        <div class="icon">🌡️</div>
+                        <p class="label">체감온도</p>
+                        <p class="value" th:text="${weather.apparent_temperature} + '°C'">
+                        </p>
+                    </div>
+
+                    <div class="weather-item">
+                        <div class="icon">💧</div>
+                        <p class="label">습도</p>
+                        <p class="value" th:text="${weather.relative_humidity_2m} + '%'">
+                        </p>
+                    </div>
+
+                    <div class="weather-item">
+                        <div class="icon">🍃</div>
+                        <p class="label">풍속</p>
+                        <p class="value" th:text="${weather.wind_speed_10m} + ' km/h'">
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 주요 기능 -->
+        <section class="feature-section">
+
+            <div class="section-heading">
+                <h2>WeatherFit과 함께 시작하기</h2>
+                <p>나만의 옷장을 만들고 날씨에 어울리는 코디를 찾아보세요.</p>
+            </div>
+
+            <div class="feature-grid">
+
+                <!-- 나의 옷장 -->
+                <div class="feature-card wardrobe-card">
+
+                    <div>
+                        <div class="feature-top">
+                            <div class="feature-icon">🧥</div>
+                            <span class="feature-number">01 / WARDROBE</span>
+                        </div>
+
+                        <h3>My Wardrobe</h3>
+
+                        <p>
+                            내가 가지고 있는 옷을 등록하고<br>
+                            나만의 디지털 옷장을 만들어 보세요.
+                        </p>
+                    </div>
+
+                    <a th:href="@{/clothes}" class="feature-button">
+                        나의 옷장 둘러보기 →
+                    </a>
+
+                </div>
+
+                <!-- AI 코디 추천 -->
+                <div class="feature-card recommend-card">
+
+                    <div>
+                        <div class="feature-top">
+                            <div class="feature-icon">✨</div>
+                            <span class="feature-number">02 / AI STYLING</span>
+                        </div>
+
+                        <h3>AI Outfit Recommendation</h3>
+
+                        <p>
+                            오늘의 날씨와 나의 옷장을 분석해<br>
+                            AI가 어울리는 코디를 추천해 줍니다.
+                        </p>
+                    </div>
+
+                    <a th:href="@{/outfit/form}" class="feature-button">
+                        AI 코디 추천받기 →
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 이용 방법 -->
+        <section class="guide-section">
+
+            <div class="section-heading">
+                <h2>WeatherFit 이용 방법</h2>
+                <p>세 가지 간단한 단계로 나에게 어울리는 코디를 찾아보세요.</p>
+            </div>
+
+            <div class="guide-grid">
+
+                <div class="guide-item">
+                    <p class="guide-number">STEP 01</p>
+                    <h3>👕 나의 옷 등록하기</h3>
+                    <p>
+                        가지고 있는 옷의 사진과 정보를 등록해
+                        나만의 옷장을 만들어 보세요.
+                    </p>
+                </div>
+
+                <div class="guide-item">
+                    <p class="guide-number">STEP 02</p>
+                    <h3>🌤️ 외출 정보 입력하기</h3>
+                    <p>
+                        외출 날짜와 시간, 활동 유형을 입력해
+                        외출 계획을 알려주세요.
+                    </p>
+                </div>
+
+                <div class="guide-item">
+                    <p class="guide-number">STEP 03</p>
+                    <h3>✨ AI 코디 확인하기</h3>
+                    <p>
+                        날씨와 나의 옷장을 바탕으로
+                        AI가 추천하는 코디를 확인하세요.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 하단 안내 -->
+        <section class="bottom-banner">
+
+            <p>
+                <strong>Dress for the weather, style your day.</strong><br>
+                오늘의 날씨에 어울리는 나만의 스타일을 찾아보세요.
+            </p>
+
+            <span>WEATHERFIT</span>
+
+        </section>
+
+    </main>
+
+    <!-- 하단 -->
+    <footer>
+        <div class="container">
+            WeatherFit © 2026. Dress for the weather, style your day.
+        </div>
+    </footer>
+
+</body>
+
+</html>

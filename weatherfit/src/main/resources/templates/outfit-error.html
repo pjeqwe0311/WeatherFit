@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 코디 추천 안내 - WeatherFit</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f8f5ef;
+            font-family: Arial, sans-serif;
+            color: #493d32;
+            padding: 20px;
+        }
+
+        .error-container {
+            width: 90%;
+            max-width: 480px;
+            padding: 45px 30px;
+            background: white;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+        }
+
+        .icon {
+            font-size: 55px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            color: #817568;
+            line-height: 1.7;
+            margin-bottom: 30px;
+            word-break: keep-all;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 13px 24px;
+            margin: 5px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            background: #806b56;
+            color: white;
+            transition: background 0.2s;
+        }
+
+        .button:hover {
+            background: #695541;
+        }
+
+        .button.secondary {
+            background: #eee8df;
+            color: #594b3e;
+        }
+
+        .button.secondary:hover {
+            background: #e2d9ce;
+        }
+
+        @media (max-width: 480px) {
+            .error-container {
+                padding: 35px 20px;
+            }
+
+            h1 {
+                font-size: 21px;
+            }
+
+            .button {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+
+        <div class="icon">🌤️</div>
+
+        <h1>코디 추천을 잠시 이용할 수 없어요</h1>
+
+        <p th:text="${errorMessage}">
+            현재 AI 코디 추천 서비스가 일시적으로 원활하지 않습니다.
+            잠시 후 다시 시도해 주세요.
+        </p>
+
+        <a th:href="@{/outfit/form}" class="button">
+            다시 코디 추천하기
+        </a>
+
+        <a th:href="@{/}" class="button secondary">
+            홈으로 돌아가기
+        </a>
+
+    </div>
+
+</body>
+</html>

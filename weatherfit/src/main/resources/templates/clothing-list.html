@@ -1,0 +1,911 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wardrobe | WeatherFit</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #f8f7f4;
+            --surface: #ffffff;
+            --primary: #38332e;
+            --accent: #a58b70;
+            --text: #292724;
+            --muted: #918980;
+            --border: #ebe7e0;
+            --soft: #f3f0eb;
+        }
+
+        body {
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        /* 상단 메뉴 */
+
+        header {
+            background: rgba(248, 247, 244, 0.95);
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav {
+            height: 78px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 34px;
+            font-size: 13px;
+            color: #827a72;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* 페이지 제목 */
+
+        .page-heading {
+            padding: 55px 0 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 25px;
+        }
+
+        .eyebrow {
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 2.5px;
+            margin-bottom: 13px;
+        }
+
+        .page-heading h1 {
+            font-size: 40px;
+            font-weight: 700;
+            letter-spacing: -1.8px;
+            margin-bottom: 10px;
+        }
+
+        .page-description {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .add-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 14px 21px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .add-button:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .add-symbol {
+            font-size: 18px;
+        }
+
+        /* 옷장 전체 레이아웃 */
+
+        .wardrobe-layout {
+            display: grid;
+            grid-template-columns: 215px minmax(0, 1fr);
+            gap: 35px;
+            padding-bottom: 80px;
+        }
+
+        /* 왼쪽 필터 */
+
+        .filter-sidebar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px 20px;
+            height: fit-content;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .filter-header h2 {
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        .reset-button {
+            border: none;
+            background: none;
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .filter-group {
+            padding: 18px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .filter-group h3 {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin: 11px 0;
+            color: #716a63;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .filter-option input {
+            width: 15px;
+            height: 15px;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .color-dot {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+        }
+
+        /* 옷 목록 영역 */
+
+        .wardrobe-content {
+            min-width: 0;
+        }
+
+        .wardrobe-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .summary-count {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .summary-count strong {
+            color: var(--accent);
+            font-size: 17px;
+            margin-right: 4px;
+        }
+
+        .clothing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .clothing-card {
+            min-width: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+
+        .clothing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(56, 51, 46, 0.08);
+        }
+
+        .image-wrap {
+            width: 100%;
+            height: 250px;
+            background: #f0ede7;
+            overflow: hidden;
+        }
+
+        .clothing-image {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 12px;
+            transition: transform 0.35s;
+        }
+
+        .clothing-card:hover .clothing-image {
+            transform: scale(1.04);
+        }
+
+        .clothing-content {
+            padding: 17px 16px;
+        }
+
+        .clothing-category {
+            color: var(--accent);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.3px;
+            margin-bottom: 7px;
+        }
+
+        .clothing-content h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .clothing-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .detail-tag {
+            background: var(--soft);
+            color: #786f65;
+            padding: 5px 9px;
+            border-radius: 5px;
+            font-size: 10px;
+        }
+
+        /* 수정 및 삭제 */
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 13px;
+            border-top: 1px solid #f0ede8;
+        }
+
+        .edit-button,
+        .delete-button {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 36px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .edit-button {
+            background: #eee8df;
+            color: #625344;
+        }
+
+        .edit-button:hover {
+            background: #e2d6c8;
+        }
+
+        .delete-button {
+            width: 100%;
+            background: #f7f5f2;
+            color: #897e73;
+            border: none;
+        }
+
+        .delete-button:hover {
+            background: #f2e8e4;
+            color: #a34d42;
+        }
+
+        /* 검색 결과 없음 */
+
+        .no-results {
+            display: none;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 65px 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .no-results h3 {
+            color: var(--primary);
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .no-results p {
+            font-size: 13px;
+        }
+
+        /* 옷이 아예 없는 경우 */
+
+        .empty-state {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 85px 20px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 54px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 21px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        /* 하단 */
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 30px 0;
+            text-align: center;
+            color: #aaa39b;
+            font-size: 11px;
+        }
+
+        /* 태블릿 */
+
+        @media (max-width: 1000px) {
+            .wardrobe-layout {
+                grid-template-columns: 180px minmax(0, 1fr);
+                gap: 20px;
+            }
+
+            .clothing-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .image-wrap {
+                height: 230px;
+            }
+        }
+
+        /* 모바일 */
+
+        @media (max-width: 650px) {
+            .container {
+                padding: 0 18px;
+            }
+
+            nav {
+                height: 67px;
+            }
+
+            .logo {
+                font-size: 21px;
+            }
+
+            .nav-links {
+                gap: 12px;
+                font-size: 10px;
+            }
+
+            .page-heading {
+                padding: 40px 0 28px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .page-heading h1 {
+                font-size: 33px;
+            }
+
+            .wardrobe-layout {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .filter-sidebar {
+                padding: 20px;
+            }
+
+            .filter-group {
+                padding: 13px 0;
+            }
+
+            .filter-options {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .clothing-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+
+            .image-wrap {
+                height: 190px;
+            }
+
+            .clothing-content {
+                padding: 13px 11px;
+            }
+
+            .clothing-content h3 {
+                font-size: 14px;
+            }
+
+            .detail-tag {
+                font-size: 9px;
+                padding: 5px 7px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="container">
+        <nav>
+            <a th:href="@{/}" class="logo">
+                Weather<span>Fit</span>
+            </a>
+
+            <div class="nav-links">
+                <a th:href="@{/}">홈</a>
+                <a th:href="@{/clothes}" class="active">나의 옷장</a>
+                <a th:href="@{/outfit/form}">AI 코디 추천</a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+
+    <section class="page-heading">
+        <div>
+            <p class="eyebrow">MY PERSONAL WARDROBE</p>
+            <h1>나의 옷장</h1>
+            <p class="page-description">
+                나만의 스타일을 기록하고, 오늘의 코디를 완성해 보세요.
+            </p>
+        </div>
+
+        <a th:href="@{/clothes/new}" class="add-button">
+            <span class="add-symbol">+</span>
+            새 옷 등록하기
+        </a>
+    </section>
+
+    <!-- 등록한 옷이 없는 경우 -->
+    <section class="empty-state"
+             th:if="${#lists.isEmpty(clothes)}">
+
+        <div class="empty-icon">🧥</div>
+        <h3>아직 등록된 옷이 없어요.</h3>
+        <p>나만의 디지털 옷장을 만들고 첫 번째 옷을 등록해 보세요.</p>
+
+        <a th:href="@{/clothes/new}" class="add-button">
+            <span class="add-symbol">+</span>
+            첫 번째 옷 등록하기
+        </a>
+    </section>
+
+    <!-- 옷이 있을 때만 필터와 목록 표시 -->
+    <div class="wardrobe-layout"
+         th:unless="${#lists.isEmpty(clothes)}">
+
+        <!-- 왼쪽 필터 -->
+        <aside class="filter-sidebar">
+
+            <div class="filter-header">
+                <h2>FILTERS</h2>
+                <button type="button"
+                        class="reset-button"
+                        id="resetFilters">
+                    초기화
+                </button>
+            </div>
+
+            <!-- 카테고리 -->
+            <div class="filter-group">
+                <h3>CATEGORY</h3>
+
+                <div class="filter-options">
+                    <label class="filter-option">
+                        <input type="checkbox" name="category" value="상의">
+                        상의
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="category" value="하의">
+                        하의
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="category" value="아우터">
+                        아우터
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="category" value="원피스">
+                        원피스
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="category" value="신발">
+                        신발
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="category" value="기타">
+                        기타
+                    </label>
+                </div>
+            </div>
+
+            <!-- 색상 -->
+            <div class="filter-group">
+                <h3>COLOR</h3>
+
+                <div class="filter-options">
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="검정">
+                        <span class="color-dot" style="background:#222"></span>
+                        검정
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="흰색">
+                        <span class="color-dot" style="background:#fff"></span>
+                        흰색
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="회색">
+                        <span class="color-dot" style="background:#aaa"></span>
+                        회색
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="베이지">
+                        <span class="color-dot" style="background:#d8c4a5"></span>
+                        베이지
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="갈색">
+                        <span class="color-dot" style="background:#80563b"></span>
+                        갈색
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="빨강">
+                        <span class="color-dot" style="background:#d94b43"></span>
+                        빨강
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="주황">
+                        <span class="color-dot" style="background:#e99545"></span>
+                        주황
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="노랑">
+                        <span class="color-dot" style="background:#eacb55"></span>
+                        노랑
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="초록">
+                        <span class="color-dot" style="background:#648b63"></span>
+                        초록
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="파랑">
+                        <span class="color-dot" style="background:#547daa"></span>
+                        파랑
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="보라">
+                        <span class="color-dot" style="background:#9274a8"></span>
+                        보라
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="color" value="기타">
+                        <span class="color-dot" style="background:#c9c3bb"></span>
+                        기타
+                    </label>
+
+                </div>
+            </div>
+
+            <!-- 두께 -->
+            <div class="filter-group">
+                <h3>THICKNESS</h3>
+
+                <div class="filter-options">
+                    <label class="filter-option">
+                        <input type="checkbox" name="thickness" value="1">
+                        1
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="thickness" value="2">
+                        2
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="thickness" value="3">
+                        3
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="thickness" value="4">
+                        4
+                    </label>
+
+                    <label class="filter-option">
+                        <input type="checkbox" name="thickness" value="5">
+                        5
+                    </label>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- 오른쪽 옷 목록 -->
+        <section class="wardrobe-content">
+
+            <div class="wardrobe-summary">
+                <h2 class="summary-title">ALL CLOTHES</h2>
+
+                <p class="summary-count">
+                    <strong id="visibleCount"
+                           th:text="${#lists.size(clothes)}">0</strong>
+                    / <span th:text="${#lists.size(clothes)}">0</span>
+                    ITEMS IN YOUR WARDROBE
+                </p>
+            </div>
+
+            <!-- 옷 카드 -->
+            <div class="clothing-grid" id="clothingGrid">
+
+                <article class="clothing-card"
+                         th:each="clothing : ${clothes}"
+                         th:attr="data-category=${clothing.category},
+                                  data-color=${clothing.color},
+                                  data-thickness=${clothing.thickness}">
+
+                    <div class="image-wrap">
+                        <img class="clothing-image"
+                             th:src="${clothing.imagePath}"
+                             th:alt="${clothing.name}">
+                    </div>
+
+                    <div class="clothing-content">
+
+                        <p class="clothing-category"
+                           th:text="${clothing.category}">
+                            CATEGORY
+                        </p>
+
+                        <h3 th:text="${clothing.name}">
+                            옷 이름
+                        </h3>
+
+                        <div class="clothing-details">
+
+                            <span class="detail-tag"
+                                  th:text="${clothing.color}">
+                                색상
+                            </span>
+
+                            <span class="detail-tag"
+                                  th:text="|두께 ${clothing.thickness}|">
+                                두께
+                            </span>
+
+                        </div>
+
+                        <div class="card-actions">
+
+                            <a class="edit-button"
+                               th:href="@{/clothes/{id}/edit(id=${clothing.id})}">
+                                수정하기
+                            </a>
+
+                            <form th:action="@{/clothes/{id}/delete(id=${clothing.id})}"
+                                  method="post"
+                                  style="flex: 1;"
+                                  onsubmit="return confirm('정말 삭제하시겠습니까?');">
+
+                                <button type="submit" class="delete-button">
+                                    삭제하기
+                                </button>
+
+                            </form>
+
+                        </div>
+                    </div>
+
+                </article>
+
+            </div>
+
+            <!-- 필터 결과가 없는 경우 -->
+            <div class="no-results" id="noResults">
+                <h3>검색 결과가 없습니다.</h3>
+                <p>다른 필터를 선택하거나 초기화해 보세요.</p>
+            </div>
+
+        </section>
+    </div>
+
+</main>
+
+<footer>
+    <div class="container">
+        WeatherFit © 2026. Dress for the weather, style your day.
+    </div>
+</footer>
+
+<!-- 필터 작동 JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const filterInputs = document.querySelectorAll(
+            '.filter-sidebar input[type="checkbox"]'
+        );
+
+        const clothingCards = document.querySelectorAll('.clothing-card');
+
+        const visibleCount = document.getElementById('visibleCount');
+
+        const noResults = document.getElementById('noResults');
+
+        const resetButton = document.getElementById('resetFilters');
+
+        function applyFilters() {
+
+            const selectedCategories = Array.from(
+                document.querySelectorAll('input[name="category"]:checked')
+            ).map(input => input.value);
+
+            const selectedColors = Array.from(
+                document.querySelectorAll('input[name="color"]:checked')
+            ).map(input => input.value);
+
+            const selectedThicknesses = Array.from(
+                document.querySelectorAll('input[name="thickness"]:checked')
+            ).map(input => input.value);
+
+            let count = 0;
+
+            clothingCards.forEach(card => {
+
+                const category = card.dataset.category;
+                const color = card.dataset.color;
+                const thickness = card.dataset.thickness;
+
+                const categoryMatch =
+                    selectedCategories.length === 0 ||
+                    selectedCategories.includes(category);
+
+                const colorMatch =
+                    selectedColors.length === 0 ||
+                    selectedColors.includes(color);
+
+                const thicknessMatch =
+                    selectedThicknesses.length === 0 ||
+                    selectedThicknesses.includes(thickness);
+
+                const isVisible =
+                    categoryMatch && colorMatch && thicknessMatch;
+
+                card.style.display = isVisible ? '' : 'none';
+
+                if (isVisible) {
+                    count++;
+                }
+            });
+
+            visibleCount.textContent = count;
+
+            noResults.style.display =
+                count === 0 ? 'block' : 'none';
+        }
+
+        filterInputs.forEach(input => {
+            input.addEventListener('change', applyFilters);
+        });
+
+        resetButton.addEventListener('click', function () {
+
+            filterInputs.forEach(input => {
+                input.checked = false;
+            });
+
+            applyFilters();
+        });
+
+    });
+</script>
+
+</body>
+</html>

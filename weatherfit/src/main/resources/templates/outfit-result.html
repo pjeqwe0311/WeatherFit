@@ -1,0 +1,663 @@
+
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 코디 추천 - WeatherFit</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            background: #f8f7f4;
+            color: #292724;
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        /* 상단 네비게이션 */
+
+        header {
+            border-bottom: 1px solid #eae7e1;
+        }
+
+        nav {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: #a58b70;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            font-size: 14px;
+            color: #77716a;
+        }
+
+        .nav-links a:hover {
+            color: #a58b70;
+        }
+
+        /* 페이지 제목 */
+
+        .page-heading {
+            text-align: center;
+            padding: 65px 0 38px;
+        }
+
+        .eyebrow {
+            color: #a58b70;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 13px;
+        }
+
+        .page-heading h1 {
+            font-size: 38px;
+            letter-spacing: -1.5px;
+            margin-bottom: 12px;
+        }
+
+        .page-heading h1 span {
+            color: #a58b70;
+        }
+
+        .page-heading p {
+            font-size: 14px;
+            color: #89827a;
+        }
+
+        /* 외출 정보 요약 */
+
+        .outing-info-section {
+            background: #eee8df;
+            border-radius: 14px;
+            padding: 24px 28px;
+            margin-bottom: 25px;
+        }
+
+        .outing-info-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #554638;
+            margin-bottom: 16px;
+        }
+
+        .outing-info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .outing-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .outing-info-label {
+            font-size: 12px;
+            color: #917d68;
+        }
+
+        .outing-info-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: #39342e;
+        }
+
+        /* 코디 전체 영역 */
+
+        .outfit-section {
+            background: white;
+            border: 1px solid #eeeae4;
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.025);
+        }
+
+        .outfit-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 27px;
+        }
+
+        .outfit-heading h2 {
+            font-size: 21px;
+            letter-spacing: -0.5px;
+        }
+
+        .outfit-heading p {
+            color: #a58b70;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* 의상 카드 */
+
+        .outfit-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 25px;
+        }
+
+        .clothing-card {
+            background: #f8f7f4;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid #eeeae4;
+            min-width: 0;
+        }
+
+        .clothing-image-area {
+            background: #f1eee8;
+            height: 370px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .clothing-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .clothing-info {
+            padding: 23px;
+            background: white;
+        }
+
+        .clothing-type {
+            display: inline-block;
+            background: #eee8df;
+            color: #91785f;
+            padding: 5px 11px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .clothing-info h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .clothing-color {
+            font-size: 13px;
+            color: #827a72;
+        }
+
+        .clothing-color strong {
+            color: #39342e;
+            margin-left: 5px;
+        }
+
+        /* 코디 조합 표시 */
+
+        .outfit-connector {
+            text-align: center;
+            padding: 25px 0 0;
+            color: #a58b70;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* AI 추천 이유 */
+
+        .reason-section {
+            background: #38332e;
+            color: white;
+            border-radius: 18px;
+            padding: 32px;
+            margin-bottom: 45px;
+        }
+
+        .reason-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 17px;
+        }
+
+        .reason-icon {
+            font-size: 27px;
+        }
+
+        .reason-title h2 {
+            font-size: 20px;
+        }
+
+        .reason-description {
+            color: #c9bfb4;
+            font-size: 12px;
+            margin-bottom: 13px;
+        }
+
+        .reason-text {
+            font-size: 15px;
+            line-height: 1.9;
+            color: #f0ebe5;
+            white-space: pre-line;
+            overflow-wrap: anywhere;
+        }
+
+        /* 하단 버튼 */
+
+        .bottom-actions {
+            display: flex;
+            justify-content: center;
+            gap: 13px;
+            padding-bottom: 80px;
+        }
+
+        .action-button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 190px;
+            padding: 14px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+
+        .primary-button {
+            background: #38332e;
+            color: white;
+        }
+
+        .primary-button:hover {
+            background: #a58b70;
+        }
+
+        .secondary-button {
+            background: #eee8df;
+            color: #625344;
+        }
+
+        .secondary-button:hover {
+            background: #e4d8c9;
+        }
+
+        /* 하단 */
+
+        footer {
+            border-top: 1px solid #eae7e1;
+            padding: 28px 0;
+            text-align: center;
+            color: #aaa39b;
+            font-size: 12px;
+        }
+
+        /* 모바일 */
+
+        @media (max-width: 650px) {
+
+            .container {
+                padding: 0 18px;
+            }
+
+            nav {
+                height: 65px;
+            }
+
+            .nav-links {
+                gap: 12px;
+                font-size: 12px;
+            }
+
+            .page-heading {
+                padding: 45px 0 30px;
+            }
+
+            .page-heading h1 {
+                font-size: 30px;
+            }
+
+            .outing-info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .outfit-section {
+                padding: 20px;
+            }
+
+            .outfit-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .clothing-image-area {
+                height: 320px;
+            }
+
+            .outfit-heading {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .reason-section {
+                padding: 24px;
+            }
+
+            .bottom-actions {
+                flex-direction: column;
+            }
+
+            .action-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 상단 네비게이션 -->
+    <header>
+        <div class="container">
+            <nav>
+                <a th:href="@{/}" class="logo">
+                    Weather<span>Fit</span>
+                </a>
+
+                <div class="nav-links">
+                    <a th:href="@{/}">홈</a>
+                    <a th:href="@{/clothes}">나의 옷장</a>
+                    <a th:href="@{/outfit/form}">AI 코디 추천</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- 페이지 제목 -->
+        <section class="page-heading">
+
+            <p class="eyebrow">YOUR PERSONAL AI STYLIST</p>
+
+            <h1>
+                오늘의 <span>AI 코디 추천</span>
+            </h1>
+
+            <p>
+                나의 옷장에서 찾은 오늘의 스타일을 확인해 보세요.
+            </p>
+
+        </section>
+
+        <!-- 외출 정보 요약 -->
+        <section class="outing-info-section"
+                 th:if="${outingDate != null}">
+
+            <h2 class="outing-info-title">
+                📅 나의 외출 정보
+            </h2>
+
+            <div class="outing-info-grid">
+
+                <div class="outing-info-item">
+                    <span class="outing-info-label">외출 날짜</span>
+                    <span class="outing-info-value"
+                          th:text="${outingDate}">날짜</span>
+                </div>
+
+                <div class="outing-info-item">
+                    <span class="outing-info-label">외출 시간</span>
+                    <span class="outing-info-value"
+                          th:text="${startTime}">시간</span>
+                </div>
+
+                <div class="outing-info-item">
+                    <span class="outing-info-label">귀가 예정</span>
+                    <span class="outing-info-value"
+                          th:text="${endTime}">시간</span>
+                </div>
+
+                <div class="outing-info-item">
+                    <span class="outing-info-label">활동 유형</span>
+                    <span class="outing-info-value"
+                          th:text="${activityType}">활동 유형</span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- 추천 코디 -->
+        <section class="outfit-section">
+
+            <div class="outfit-heading">
+
+                <h2>Today's Outfit</h2>
+
+                <p>AI STYLING COLLECTION</p>
+
+            </div>
+
+            <div class="outfit-grid">
+
+                <!-- 추천 상의 -->
+                <div class="clothing-card">
+
+                    <div class="clothing-image-area">
+
+                        <img class="clothing-image"
+                             th:src="${top.imagePath}"
+                             th:alt="${top.name}">
+
+                    </div>
+
+                    <div class="clothing-info">
+
+                        <span class="clothing-type">
+                            TOP · 추천 상의
+                        </span>
+
+                        <h3 th:text="${top.name}">
+                            추천 상의 이름
+                        </h3>
+
+                        <p class="clothing-color">
+                            색상:
+                            <strong th:text="${top.color}">
+                                색상
+                            </strong>
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- 추천 하의 -->
+                <div class="clothing-card">
+
+                    <div class="clothing-image-area">
+
+                        <img class="clothing-image"
+                             th:src="${bottom.imagePath}"
+                             th:alt="${bottom.name}">
+
+                    </div>
+
+                    <div class="clothing-info">
+
+                        <span class="clothing-type">
+                            BOTTOM · 추천 하의
+                        </span>
+
+                        <h3 th:text="${bottom.name}">
+                            추천 하의 이름
+                        </h3>
+
+                        <p class="clothing-color">
+                            색상:
+                            <strong th:text="${bottom.color}">
+                                색상
+                            </strong>
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- 추천 아우터: 추천된 경우에만 표시 -->
+                <div class="clothing-card"
+                     th:if="${outer != null}">
+
+                    <div class="clothing-image-area">
+
+                        <img class="clothing-image"
+                             th:src="${outer.imagePath}"
+                             th:alt="${outer.name}">
+
+                    </div>
+
+                    <div class="clothing-info">
+
+                        <span class="clothing-type">
+                            OUTER · 추천 아우터
+                        </span>
+
+                        <h3 th:text="${outer.name}">
+                            추천 아우터 이름
+                        </h3>
+
+                        <p class="clothing-color">
+                            색상:
+                            <strong th:text="${outer.color}">
+                                색상
+                            </strong>
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- 추천 신발: 추천된 경우에만 표시 -->
+                <div class="clothing-card"
+                     th:if="${shoes != null}">
+
+                    <div class="clothing-image-area">
+
+                        <img class="clothing-image"
+                             th:src="${shoes.imagePath}"
+                             th:alt="${shoes.name}">
+
+                    </div>
+
+                    <div class="clothing-info">
+
+                        <span class="clothing-type">
+                            SHOES · 추천 신발
+                        </span>
+
+                        <h3 th:text="${shoes.name}">
+                            추천 신발 이름
+                        </h3>
+
+                        <p class="clothing-color">
+                            색상:
+                            <strong th:text="${shoes.color}">
+                                색상
+                            </strong>
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="outfit-connector">
+                YOUR WARDROBE · YOUR STYLE
+            </div>
+
+        </section>
+
+        <!-- AI 추천 이유 -->
+        <section class="reason-section">
+
+            <div class="reason-title">
+
+                <span class="reason-icon">✨</span>
+
+                <h2>AI가 이 코디를 추천한 이유</h2>
+
+            </div>
+
+            <p class="reason-description">
+                WeatherFit AI Stylist의 코디 분석
+            </p>
+
+            <p class="reason-text"
+               th:text="${reason}">
+            </p>
+
+        </section>
+
+        <!-- 하단 버튼 -->
+        <section class="bottom-actions">
+
+            <a th:href="@{/clothes}"
+               class="action-button secondary-button">
+                나의 옷장 보기
+            </a>
+
+            <a th:href="@{/outfit/form}"
+               class="action-button primary-button">
+                다시 코디 추천받기 →
+            </a>
+
+        </section>
+
+    </main>
+
+    <!-- 하단 -->
+    <footer>
+        <div class="container">
+            WeatherFit © 2026. Dress for the weather, style your day.
+        </div>
+    </footer>
+
+</body>
+</html>
